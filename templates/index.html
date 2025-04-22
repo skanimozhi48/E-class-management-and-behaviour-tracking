@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>E class engagement and behaviour tracking</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      margin: 10px;
+      color: #2c3e50;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    }
+
+    #video-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-height: 65vh;
+      margin: auto;
+      padding: 0 10px;
+    }
+
+    #video {
+      border-radius: 15px;
+      max-width: 100%;
+      max-height: 60vh;
+      border: 4px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 10px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #start-btn { background-color: #00c853; }
+    #stop-btn { background-color: #d50000; }
+    #download-btn { background-color: #2962ff; }
+    #fullscreen-btn { background-color: #ff9800; }
+
+    #popup-messages {
+      text-align: center;
+      font-weight: bold;
+      color: #e67e22;
+      margin-top: 5px;
+    }
+
+    #theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #000;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 999;
+    }
+
+    .dark-mode {
+      background: #121212;
+      color: white;
+    }
+
+    @media screen and (max-width: 768px) {
+      #video {
+        max-height: 45vh;
+      }
+
+      .button-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #theme-toggle {
+        bottom: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>E class engagement and behaviour tracking</h1>
+
+  <div id="video-container">
+    <img id="video" src="{{ url_for('video_feed') }}" alt="Live Video Stream">
+  </div>
+
+  <div class="button-container">
+    <button id="start-btn">Start Webcam</button>
+    <button id="stop-btn">Stop & Send Email</button>
+    <button id="download-btn">Download Attendance</button>
+    <button id="fullscreen-btn">Fullscreen</button>
+  </div>
+
+  <div id="popup-messages"></div>
+
+  <div id="theme-toggle">Toggle Theme</div>
+
+  <script>
+    document.getElementById("stop-btn").addEventListener("click", function () {
+      fetch("/stop")
+        .then((res) => res.json())
+        .then((data) => alert(data.message));
+    });
+
+    document.getElementById("download-btn").addEventListener("click", function () {
+      window.location.href = "/download";
+    });
+
+    document.getElementById("fullscreen-btn").addEventListener("click", function () {
+      const video = document.getElementById("video");
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+      }
+    });
+
+    function fetchPopupMessages() {
+      fetch("/popup_messages")
+        .then((res) => res.json())
+        .then((data) => {
+          const div = document.getElementById("popup-messages");
+          div.innerHTML = "";
+          data.messages.forEach(msg => {
+            const p = document.createElement("p");
+            p.textContent = msg;
+            div.appendChild(p);
+          });
+        });
+    }
+
+    setInterval(fetchPopupMessages, 3000);
+
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+    });
+  </script>
+</body>
+</html>
+ 
+
